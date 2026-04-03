@@ -1,0 +1,7 @@
+shiny
+seaborn
+pandas
+openpyxl
+pyreadr
+jinja2
+matplotlib
