@@ -497,8 +497,8 @@ ui.tags.style(
 
 
 
-GA4_MEASUREMENT_ID = "G-0GE1LNGVH7"
-APP_VARIANT = "right"
+GA4_MEASUREMENT_ID = "G-B98MJ8VFJ2"
+APP_VARIANT = "left"
 TRACKED_CONTROL_IDS = [
     "load_sample_btn",
     "apply_missing",
@@ -854,7 +854,27 @@ with ui.navset_bar(
             )
 
     with ui.nav_panel("Data Upload"):
-        with ui.layout_columns(col_widths=(8, 4)):
+        with ui.layout_columns(col_widths=(4, 8)):
+            with ui.card(class_="left-tools"):
+                ui.div("Data Upload", class_="section-title")
+                with ui.div(class_="feature-block"):
+                    ui.div("Upload Dataset", class_="group-title")
+                    ui.input_file(
+                        "file_upload",
+                        "Choose a file",
+                        accept=[".csv", ".xlsx", ".json", ".rds", ".parquet"],
+                        multiple=False,
+                    )
+                with ui.div(class_="feature-block"):
+                    ui.div("Load Sample Dataset", class_="group-title")
+                    ui.input_select(
+                        "sample_dataset",
+                        "Sample data",
+                        choices={"": "Select sample", "penguins": "Penguins", "cars": "Cars", "College": "College"},
+                        selected="",
+                    )
+                    ui.input_action_button("load_sample_btn", "Load selected sample")
+
             with ui.div():
                 with ui.card(class_="compact-feedback"):
                     ui.div("Current Data State", class_="section-title")
@@ -877,60 +897,8 @@ with ui.navset_bar(
                                     return render.DataGrid(pd.DataFrame({"Message": ["No data loaded"]}), width="100%", height="220px")
                                 return render.DataGrid(df.head(15), width="100%", height="220px")
 
-            with ui.card(class_="left-tools"):
-                ui.div("Data Upload", class_="section-title")
-                with ui.div(class_="feature-block"):
-                    ui.div("Upload Dataset", class_="group-title")
-                    ui.input_file(
-                        "file_upload",
-                        "Choose a file",
-                        accept=[".csv", ".xlsx", ".json", ".rds", ".parquet"],
-                        multiple=False,
-                    )
-                with ui.div(class_="feature-block"):
-                    ui.div("Load Sample Dataset", class_="group-title")
-                    ui.input_select(
-                        "sample_dataset",
-                        "Sample data",
-                        choices={"": "Select sample", "penguins": "Penguins", "cars": "Cars", "College": "College"},
-                        selected="",
-                    )
-                    ui.input_action_button("load_sample_btn", "Load selected sample")
-
     with ui.nav_panel("Cleaning"):
-        with ui.layout_columns(col_widths=(8, 4)):
-            with ui.div():
-                with ui.layout_columns(col_widths=(6, 6)):
-                    with ui.card(class_="small-card"):
-                        ui.div("Operation Feedback", class_="section-title")
-                        @render.ui
-                        def cleaning_feedback_ui():
-                            return status_box(cleaning_status.get())
-                    with ui.card(class_="small-empty"):
-                        ui.div("Operation History", class_="section-title")
-                        @render.ui
-                        def operation_history_table():
-                            logs = operation_log.get()
-                            if not logs:
-                                return ui.div("No operations yet", class_="alert alert-secondary")
-                            rows = "".join(f"<tr><td>{i}</td><td>{msg}</td></tr>" for i, msg in enumerate(logs, start=1))
-                            return ui.HTML(
-                                f"""
-                                <table class="history-table">
-                                  <thead><tr><th>Step</th><th>History</th></tr></thead>
-                                  <tbody>{rows}</tbody>
-                                </table>
-                                """
-                            )
-                with ui.card(class_="dense-grid"):
-                    ui.div("Processed Data Preview", class_="section-title")
-                    @render.data_frame
-                    def cleaning_preview():
-                        df = current_df.get()
-                        if df.empty:
-                            return render.DataGrid(pd.DataFrame({"Message": ["No data loaded"]}), width="100%", height="200px")
-                        return render.DataGrid(df.head(8), width="100%", height="200px")
-
+        with ui.layout_columns(col_widths=(4, 8)):
             with ui.card(class_="left-tools"):
                 ui.div("Cleaning & Preprocessing", class_="section-title")
                 ui.input_radio_buttons(
@@ -992,43 +960,40 @@ with ui.navset_bar(
 
                 ui.input_action_button("reset_data", "Reset data", class_="mt-2")
 
-    with ui.nav_panel("Feature Engineering"):
-        with ui.layout_columns(col_widths=(8, 4)):
             with ui.div():
                 with ui.layout_columns(col_widths=(6, 6)):
                     with ui.card(class_="small-card"):
-                        ui.div("Feature Feedback", class_="section-title")
+                        ui.div("Operation Feedback", class_="section-title")
                         @render.ui
-                        def feature_feedback_ui():
-                            return status_box(fe_status.get())
+                        def cleaning_feedback_ui():
+                            return status_box(cleaning_status.get())
                     with ui.card(class_="small-empty"):
-                        ui.div("Engineered Variables", class_="section-title")
+                        ui.div("Operation History", class_="section-title")
                         @render.ui
-                        def engineered_columns_ui():
-                            cols = engineered_columns.get()
-                            if not cols:
-                                return ui.div("No engineered columns yet", class_="alert alert-secondary")
-                            rows = "".join(
-                                f"<tr><td>{c['name']}</td><td>{c['derived_from']}</td><td>{c['transformation']}</td></tr>"
-                                for c in cols
-                            )
+                        def operation_history_table():
+                            logs = operation_log.get()
+                            if not logs:
+                                return ui.div("No operations yet", class_="alert alert-secondary")
+                            rows = "".join(f"<tr><td>{i}</td><td>{msg}</td></tr>" for i, msg in enumerate(logs, start=1))
                             return ui.HTML(
                                 f"""
                                 <table class="history-table">
-                                  <thead><tr><th>New Column</th><th>Derived From</th><th>Method</th></tr></thead>
+                                  <thead><tr><th>Step</th><th>History</th></tr></thead>
                                   <tbody>{rows}</tbody>
                                 </table>
                                 """
                             )
                 with ui.card(class_="dense-grid"):
-                    ui.div("Current Data Preview", class_="section-title")
+                    ui.div("Processed Data Preview", class_="section-title")
                     @render.data_frame
-                    def feature_preview():
+                    def cleaning_preview():
                         df = current_df.get()
                         if df.empty:
                             return render.DataGrid(pd.DataFrame({"Message": ["No data loaded"]}), width="100%", height="200px")
                         return render.DataGrid(df.head(8), width="100%", height="200px")
 
+    with ui.nav_panel("Feature Engineering"):
+        with ui.layout_columns(col_widths=(4, 8)):
             with ui.card(class_="left-tools"):
                 ui.div("Feature Engineering", class_="section-title")
                 ui.input_radio_buttons(
@@ -1075,8 +1040,78 @@ with ui.navset_bar(
                         ui.input_selectize("drop_cols", "Columns to drop", choices=[], multiple=True)
                         ui.input_action_button("apply_drop_cols", "Drop selected columns")
 
+            with ui.div():
+                with ui.layout_columns(col_widths=(6, 6)):
+                    with ui.card(class_="small-card"):
+                        ui.div("Feature Feedback", class_="section-title")
+                        @render.ui
+                        def feature_feedback_ui():
+                            return status_box(fe_status.get())
+                    with ui.card(class_="small-empty"):
+                        ui.div("Engineered Variables", class_="section-title")
+                        @render.ui
+                        def engineered_columns_ui():
+                            cols = engineered_columns.get()
+                            if not cols:
+                                return ui.div("No engineered columns yet", class_="alert alert-secondary")
+                            rows = "".join(
+                                f"<tr><td>{c['name']}</td><td>{c['derived_from']}</td><td>{c['transformation']}</td></tr>"
+                                for c in cols
+                            )
+                            return ui.HTML(
+                                f"""
+                                <table class="history-table">
+                                  <thead><tr><th>New Column</th><th>Derived From</th><th>Method</th></tr></thead>
+                                  <tbody>{rows}</tbody>
+                                </table>
+                                """
+                            )
+                with ui.card(class_="dense-grid"):
+                    ui.div("Current Data Preview", class_="section-title")
+                    @render.data_frame
+                    def feature_preview():
+                        df = current_df.get()
+                        if df.empty:
+                            return render.DataGrid(pd.DataFrame({"Message": ["No data loaded"]}), width="100%", height="200px")
+                        return render.DataGrid(df.head(8), width="100%", height="200px")
+
     with ui.nav_panel("EDA"):
-        with ui.layout_columns(col_widths=(8, 4)):
+        with ui.layout_columns(col_widths=(4, 8)):
+            with ui.card(class_="left-tools eda-viz-panel"):
+                ui.div("Visualization", class_="section-title")
+                ui_core.row(
+                    ui_core.column(
+                        6,
+                        ui.div("Plot", class_="group-title"),
+                        ui.input_select(
+                            "plot_type",
+                            "Plot Type",
+                            {
+                                "hist": "Histogram",
+                                "box": "Box Plot",
+                                "bar": "Bar Chart",
+                                "scatter": "Scatter Plot",
+                                "corr": "Correlation Heatmap",
+                            },
+                            selected="hist",
+                        ),
+                        ui.input_select("x_var", "X Axis", choices={}),
+                        ui.input_select("y_var", "Y Axis", choices={}),
+                        ui.input_select("color_var", "Color (optional)", choices={"": "None"}),
+                    ),
+                    ui_core.column(
+                        6,
+                        ui.div("Filters", class_="group-title"),
+                        ui.input_select("num_filter_col", "Numeric filter", choices={"": "None"}),
+                        ui.input_slider("num_filter_range", "Range", min=0.0, max=1.0, value=[0.0, 1.0]),
+                        ui.input_select("cat_filter_col", "Category filter", choices={"": "None"}),
+                        ui.input_selectize("cat_filter_vals", "Category values", choices=[], multiple=True),
+                    ),
+                    class_="g-2 eda-viz-columns",
+                )
+                with ui.div(class_="eda-viz-generate"):
+                    ui.input_action_button("generate_plot", "Generate plot")
+
             with ui.div():
                 with ui.card(class_="eda-plot-card"):
                     ui.div("Plot Output", class_="section-title")
@@ -1162,52 +1197,8 @@ with ui.navset_bar(
                             info = {**info, "message": "Ready when you generate a plot."}
                         return status_box(info)
 
-            with ui.card(class_="left-tools eda-viz-panel"):
-                ui.div("Visualization", class_="section-title")
-                ui_core.row(
-                    ui_core.column(
-                        6,
-                        ui.div("Plot", class_="group-title"),
-                        ui.input_select(
-                            "plot_type",
-                            "Plot Type",
-                            {
-                                "hist": "Histogram",
-                                "box": "Box Plot",
-                                "bar": "Bar Chart",
-                                "scatter": "Scatter Plot",
-                                "corr": "Correlation Heatmap",
-                            },
-                            selected="hist",
-                        ),
-                        ui.input_select("x_var", "X Axis", choices={}),
-                        ui.input_select("y_var", "Y Axis", choices={}),
-                        ui.input_select("color_var", "Color (optional)", choices={"": "None"}),
-                    ),
-                    ui_core.column(
-                        6,
-                        ui.div("Filters", class_="group-title"),
-                        ui.input_select("num_filter_col", "Numeric filter", choices={"": "None"}),
-                        ui.input_slider("num_filter_range", "Range", min=0.0, max=1.0, value=[0.0, 1.0]),
-                        ui.input_select("cat_filter_col", "Category filter", choices={"": "None"}),
-                        ui.input_selectize("cat_filter_vals", "Category values", choices=[], multiple=True),
-                    ),
-                    class_="g-2 eda-viz-columns",
-                )
-                with ui.div(class_="eda-viz-generate"):
-                    ui.input_action_button("generate_plot", "Generate plot")
-
     with ui.nav_panel("Export"):
-        with ui.layout_columns(col_widths=(9, 3)):
-            with ui.card(class_="dense-grid"):
-                ui.div("Preview", class_="section-title")
-                @render.data_frame
-                def export_preview():
-                    df = current_df.get()
-                    if df.empty:
-                        return render.DataGrid(pd.DataFrame({"Message": ["No data loaded"]}), width="100%", height="220px")
-                    return render.DataGrid(df.head(15), width="100%", height="220px")
-
+        with ui.layout_columns(col_widths=(3, 9)):
             with ui.card(class_="left-tools"):
                 ui.div("Export", class_="section-title")
                 @render.download(filename="processed_data.csv")
@@ -1217,6 +1208,16 @@ with ui.navset_bar(
                         yield "No data available.\n"
                     else:
                         yield df.to_csv(index=False)
+
+            with ui.card(class_="dense-grid"):
+                ui.div("Preview", class_="section-title")
+                @render.data_frame
+                def export_preview():
+                    df = current_df.get()
+                    if df.empty:
+                        return render.DataGrid(pd.DataFrame({"Message": ["No data loaded"]}), width="100%", height="220px")
+                    return render.DataGrid(df.head(15), width="100%", height="220px")
+
 
 def _after_data_loaded(df: pd.DataFrame, source: str) -> None:
     current_df.set(df.copy())
