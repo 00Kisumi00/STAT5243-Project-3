@@ -1,7 +1,8 @@
 shiny
-seaborn
+numpy
 pandas
-openpyxl
 pyreadr
-jinja2
 matplotlib
+openpyxl
+pyarrow
+rsconnect-python
